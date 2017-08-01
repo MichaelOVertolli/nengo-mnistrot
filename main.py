@@ -17,7 +17,7 @@ def main(config):
 	data_format = config.data_format
 	data_loader=config.data_loader
 	channel = get_conv_shape(data_loader, data_format)
-	neuron_type=c
+	neuron_type=nengo.LIF(tau_rc=0.02, tau_ref=0.002)#LIF neuron
 		
 		
 		
