@@ -5,7 +5,7 @@ import math
 import json
 import logging
 import numpy as np
-from PIL import Image
+#from pillow import Image
 from datetime import datetime
 
 def prepare_dirs_and_logger(config):

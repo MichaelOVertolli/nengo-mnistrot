@@ -2,7 +2,6 @@ import numpy as np
 import nengo
 import nengo_dl
 import tensorflow as tf
-from groupy.gconv.tensorflow_gconv.splitgconv2d import gconv2d, gconv2d_util
 slim = tf.contrib.slim
 
 def GeneratorCNN(z, hidden_num, output_num, repeat_num, data_format, reuse, neuron_type, ens_params): 
@@ -26,7 +25,7 @@ def GeneratorCNN(z, hidden_num, output_num, repeat_num, data_format, reuse, neur
 
 						out=tensor_layer(x,layer_func=slim.conv2d,num_outputs=1,kernel_size=3,stride=1,
                                          activation_fn=None,data_format=data_format)
-	return net, out
+		return net,out
 	
 def GeneratorRCNN(x,input_channel,z_num,repeat_num,hidden_num,data_format,neuron_type, ens_params):
 	with nengo.Network() as net:
@@ -62,7 +61,7 @@ def DiscriminatorCNN(x,input_channel,z_num,repeat_num,hidden_num,data_format,neu
 		activation_fn=tf.nn.elu,data_format=data_format)
 
 		prev_channel_num=hidden_num
-		for idx in range(repeat_num)
+		for idx in range(repeat_num):
 			channel_num=hidden_num * (idx+1)
 			x=tensor_layer(x,layer_func,num_outputs=channel_num,kernel_size=3,stride=1,
 				activation_fn=None,data_format=data_format)
@@ -98,9 +97,10 @@ def DiscriminatorCNN(x,input_channel,z_num,repeat_num,hidden_num,data_format,neu
 def int_shape(tensor):
 	shape = tensor.get_shape().as_list()
 	return [num if num is not None else -1 for num in shape]
+ 
 
 def get_conv_shape(tensor, data_format):
-	shape = int_shape(tensor)
+	#shape = int_shape(tensor)
 	# always return [N, H, W, C]
 	if data_format == 'NCHW':
 		return [shape[0], shape[2], shape[3], shape[1]]

@@ -5,17 +5,17 @@ import nengo_dl
 
 from config import get_config
 from data_loader import get_loader
-from utils import prepare_dirs_and_logger, save_config
-from models import GeneratorCNN, GeneratorRCNN, DiscriminatorCNN
+from utils import prepare_dirs_and_logger
+from models import GeneratorCNN, GeneratorRCNN, DiscriminatorCNN, get_conv_shape
 
 def main(config):
 	prepare_dirs_and_logger(config)
 	batch_size = config.batch_size
 	z_num = config.z_num
 	hidden_num = config.conv_hidden_num
-	repeat_num = int(np.log2(height)) - 2
+	repeat_num = int(np.log2(config.input_scale_size)) - 2
+	data_loader=get_loader
 	data_format = config.data_format
-	data_loader=config.data_loader
 	channel = get_conv_shape(data_loader, data_format)
 	neuron_type=nengo.LIF(tau_rc=0.02, tau_ref=0.002)#LIF neuron
 		
