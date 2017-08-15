@@ -6,7 +6,7 @@ import nengo_dl
 from config import get_config
 from data_loader import get_loader
 from utils import prepare_dirs_and_logger
-from models import GeneratorCNN, GeneratorRCNN, DiscriminatorCNN, get_conv_shape
+from models import GeneratorCNN, GeneratorRCNN, DiscriminatorCNN, get_conv_shape2
 
 def main(config):
 	prepare_dirs_and_logger(config)
@@ -14,9 +14,9 @@ def main(config):
 	z_num = config.z_num
 	hidden_num = config.conv_hidden_num
 	repeat_num = int(np.log2(config.input_scale_size)) - 2
-	data_loader=get_loader
+	#data_loader=get_loader()
 	data_format = config.data_format
-	channel = get_conv_shape(data_loader, data_format)
+	channel = 3 #get_conv_shape2(data_loader, data_format)
 	neuron_type=nengo.LIF(tau_rc=0.02, tau_ref=0.002)#LIF neuron
 		
 		
@@ -24,9 +24,9 @@ def main(config):
 		
     #do the rest of the importing... look at trainer.py in the __init__ and the code below for which vars
 
-	z = tf.random_uniform(batch_size, z_num)
+	z = np.random.uniform(size=(batch_size, z_num), low=-1.0, high=1.0)
 
-	neuron_type = nengo_dl.LIF(tau_rc=0.02, tau_ref=0.002)#, sigma=0.002)
+	neuron_type = nengo.LIF(tau_rc=0.02, tau_ref=0.002)#, sigma=0.002)
 	ens_params = dict(max_rates=nengo.dists.Choice([100]), intercepts=nengo.dists.Choice([0]))
 
 	with nengo.Network() as net:
