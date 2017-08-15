@@ -4,7 +4,7 @@ import nengo
 import nengo_dl
 
 from config import get_config
-from data_loader import get_loader
+#from data_loader import get_loader
 from utils import prepare_dirs_and_logger
 from models import GeneratorCNN, GeneratorRCNN, DiscriminatorCNN, get_conv_shape2
 

@@ -10,21 +10,23 @@ def GeneratorCNN(z, hidden_num, output_num, repeat_num, data_format, reuse, neur
 				with nengo.Network() as net:
 						nengo_dl.configure_settings(trainable=False)
 						num_output=int(np.prod([7,7,hidden_num]))
-						x=tensor_layer(z,layer_func=slim.fully_connected,shape_in=z.shape,num_outputs=num_output,activation_fn=None)#inpt=z in tensorflow code, used z here too
-						x=reshape2(x,7,7, hidden_num)
+						x=tensor_layer(z,layer_func=slim.fully_connected,num_outputs=num_output,activation_fn=None)#inpt=z in tensorflow code, used z here too
+						#x=reshape2(x,7,7, hidden_num)
 
-						for idx in range(repeat_num):
-								x = nengo_dl.tensor_layer(x, layer_func=slim.conv2d, num_outputs=hidden_num, kernel_size=3, 
+						for idx in range(1, repeat_num+1):
+                                                                print idx
+                                                                shape_in=(hidden_num, 7*idx, 7*idx)
+								x = nengo_dl.tensor_layer(x, layer_func=slim.conv2d, shape_in=shape_in, num_outputs=hidden_num, kernel_size=3, 
 												stride=1, activation_fn=None, data_format=data_format)
 								x = nengo_dl.tensor_layer(x, neuron_type, **ens_params) #add these lines to the other functions
-								x = tensor_layer(x, layer_func=slim.conv2d, num_outputs=hidden_num, kernel_size=3, 
+								x = tensor_layer(x, layer_func=slim.conv2d, shape_in=shape_in, num_outputs=hidden_num, kernel_size=3, 
                                                  stride=1, activation_fn=None, data_format=data_format)
 								#if idx < repeat_num - 1:
 								x = nengo_dl.tensor_layer(x, neuron_type, **ens_params)
-								x = upscale2(x,2)
+								x = upscale2(x,2,shape_in)
 
 
-						out=tensor_layer(x,layer_func=slim.conv2d,num_outputs=1,kernel_size=3,stride=1,
+						out=tensor_layer(x,layer_func=slim.conv2d,shape_in=(hidden_num, 28, 28), num_outputs=1,kernel_size=3,stride=1,
                                          activation_fn=None,data_format=data_format)
 		return net,out
 	
@@ -135,15 +137,18 @@ def upscale(x, scale, data_format):
 	_, h, w, _ = get_conv_shape(x, data_format)
 	return resize_nearest_neighbor(x, (h*scale, w*scale), data_format)
 		
-def upscale2(x, scale):
-	shape = nengo_dl.tensor_layer(x,layer_func=tf.shape,name=None,out_type=tf.int32)
-	shape = [num if num is not None else -1 for num in shape]
-	h = shape[2]
-	w = shape[3]
-	x = nengo_dl.tensor_layer(x, layer_func=tf.transpose, perm=[0, 2, 3, 1])
+def upscale2(x, scale, shape_in):
+	#shape = nengo_dl.tensor_layer(x,layer_func=tf.shape,shape_in=shape_in,name=None,out_type=tf.int32)
+	#shape = [num if num is not None else -1 for num in shape]
+        c = shape_in[0]
+        h = shape_in[1]
+	w = shape_in[2]
+        shape_in_flipped = (h, w, c)
+	x = nengo_dl.tensor_layer(x, layer_func=tf.transpose, shape_in=shape_in,perm=[0, 2, 3, 1])
 	new_size = (h*scale,w*scale)
-	x = nengo_dl.tensor_layer(x, layer_func=tf.image.resize_nearest_neighbor, size=new_size)
-	x = nengo_dl.tensor_layer(x, layer_func=tf.transpose, perm=[0, 3, 1, 2])
+        
+	x = nengo_dl.tensor_layer(x, layer_func=tf.image.resize_nearest_neighbor, shape_in=shape_in_flipped, size=new_size)
+	x = nengo_dl.tensor_layer(x, layer_func=tf.transpose, shape_in=(h*scale, w*scale, shape_in[0]), perm=[0, 3, 1, 2])
 	return x
 
 def get_conv_shape2(tensor,data_format):
