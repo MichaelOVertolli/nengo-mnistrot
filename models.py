@@ -44,7 +44,6 @@ def GeneratorRCNN(x,input_channel,z_num,repeat_num,hidden_num,data_format,neuron
 			shape_in= (hidden_num, int(28/(2**idx)), int(28/(2**idx)))
 			shape_in2= (channel_num, int(28/(2**idx)), int(28/(2**idx)))
                         
-			
 			x=nengo_dl.tensor_layer(x,layer_func=slim.conv2d,shape_in=shape_in,num_outputs=channel_num,kernel_size=3,
 				stride=1,activation_fn=None,normalizer_fn=slim.batch_norm,data_format=data_format)
 			x = nengo_dl.tensor_layer(x, neuron_type, **ens_params) 
@@ -75,7 +74,9 @@ def DiscriminatorCNN(x,input_channel,z_num,repeat_num,hidden_num,data_format,neu
 		for idx in range(repeat_num):
 			channel_num=hidden_num * (idx+1)
 			shape_in=(channel_num, int(28/(2**idx)), int(28/(2**idx)))
-			x=nengo_dl.tensor_layer(x,layer_func=slim.conv2d,shape_in=shape_in,num_outputs=channel_num,kernel_size=3,stride=1,
+			shape_in2= (hidden_num, int(28/(2**idx)), int(28/(2**idx)))
+			
+			x=nengo_dl.tensor_layer(x,layer_func=slim.conv2d,shape_in=shape_in2,num_outputs=channel_num,kernel_size=3,stride=1,
 				activation_fn=None,data_format=data_format)
 			x = nengo_dl.tensor_layer(x, neuron_type, **ens_params) 
 			x=tensor_layer(x,layer_func=slim.conv2d,shape_in=shape_in,num_outputs=channel_num,kernel_size=3,stride=1,
@@ -88,7 +89,7 @@ def DiscriminatorCNN(x,input_channel,z_num,repeat_num,hidden_num,data_format,neu
 				
 		#x=reshape2(x,7,7, hidden_num)
 		
-		z=x=nengo_dl.tensor_layer(x,layer_func=slim.fully_connected,shape_in=(256,7,7),num_outputs=z,activation_fn=None)
+		z=nengo_dl.tensor_layer(x,layer_func=slim.fully_connected,shape_in=(128,7,7),num_outputs=z_num,activation_fn=None)
 		
 		#decoder
 		num_output=int(np.prod([7,7,channel_num]))
@@ -97,10 +98,12 @@ def DiscriminatorCNN(x,input_channel,z_num,repeat_num,hidden_num,data_format,neu
 		#x=reshape2(x,7,7, hidden_num)
 		
 		for idx in range(repeat_num):
-			shape_in=(hidden_num, 7*idx, 7*idx)
+			shape_in=(channel_num, 7,7)
+			shape_in2=(hidden_num, 7,7)
+			
 			x=nengo_dl.tensor_layer(x,layer_func=slim.conv2d,shape_in=shape_in,num_outputs=hidden_num,kernel_size=3,stride=1,
 			activation_fn=None,data_format=data_format)
-			x=nengo_dl.tensor_layer(x,layer_func=slim.conv2d,shape_in=shape_in,num_outputs=hidden_num,kernel_size=3,stride=1,
+			x=nengo_dl.tensor_layer(x,layer_func=slim.conv2d,shape_in=shape_in2,num_outputs=hidden_num,kernel_size=3,stride=1,
 			activation_fn=None,data_format=data_format)
 			#if idx < repeat_num - 1:
 			
@@ -175,8 +178,6 @@ def get_conv_shape2(tensor,data_format):
 def reshape2(x, h, w, c):
 	x = tensor_layer(x, layer_func=tf.reshape, shape=[-1, c, h, w])
 	return x
-				
-				
 				
 				
 				
