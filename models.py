@@ -10,11 +10,11 @@ def GeneratorCNN(z, hidden_num, output_num, repeat_num, data_format, reuse, neur
 				with nengo.Network() as net:
 						nengo_dl.configure_settings(trainable=False)
 						num_output=int(np.prod([7,7,hidden_num]))
-						x=tensor_layer(z,layer_func=slim.fully_connected,num_outputs=num_output,activation_fn=None)#inpt=z in tensorflow code, used z here too
+						x=tensor_layer(z,layer_func=slim.fully_connected, shape_in=(z.size_out,), num_outputs=num_output,activation_fn=None)#inpt=z in tensorflow code, used z here too
 						#x=reshape2(x,7,7, hidden_num)
 
 						for idx in range(1, repeat_num+1):
-							print (idx)
+							print(idx)
 							shape_in=(hidden_num, 7*idx, 7*idx)
 							x = nengo_dl.tensor_layer(x, layer_func=slim.conv2d, shape_in=shape_in, num_outputs=hidden_num, kernel_size=3, 
 												stride=1, activation_fn=None, data_format=data_format)
@@ -34,7 +34,7 @@ def GeneratorCNN(z, hidden_num, output_num, repeat_num, data_format, reuse, neur
 def GeneratorRCNN(x,input_channel,z_num,repeat_num,hidden_num,data_format,neuron_type, ens_params):
 	with nengo.Network() as net:
 		nengo_dl.configure_settings(trainable=False)
-		print(x.size_out)
+		
 		x = tensor_layer(x, layer_func=slim.conv2d,shape_in=(1,28,28) ,num_outputs=hidden_num, kernel_size=3,
 		stride=1, activation_fn=None, normalizer_fn=slim.batch_norm,data_format=data_format)
 		
@@ -43,7 +43,8 @@ def GeneratorRCNN(x,input_channel,z_num,repeat_num,hidden_num,data_format,neuron
 			channel_num=hidden_num * (idx+1)
 			shape_in= (hidden_num, int(28/(2**idx)), int(28/(2**idx)))
 			shape_in2= (channel_num, int(28/(2**idx)), int(28/(2**idx)))
-			print(x.size_out)
+                        
+			
 			x=nengo_dl.tensor_layer(x,layer_func=slim.conv2d,shape_in=shape_in,num_outputs=channel_num,kernel_size=3,
 				stride=1,activation_fn=None,normalizer_fn=slim.batch_norm,data_format=data_format)
 			x = nengo_dl.tensor_layer(x, neuron_type, **ens_params) 
@@ -55,8 +56,9 @@ def GeneratorRCNN(x,input_channel,z_num,repeat_num,hidden_num,data_format,neuron
 				stride=2,activation_fn=None,normalizer_fn=slim.batch_norm,data_format=data_format)
 		
 		#x=reshape2(x,7,7, hidden_num)
-		print(x.size_out)
-		z = tensor_layer(x,layer_func=slim.fully_connected,shape_in=(128,7,7),num_outputs=z_num,activation_fn=None)#inpt=x in tensorflow code, used x here too
+		
+		z = tensor_layer(x,layer_func=slim.fully_connected,num_outputs=z_num,activation_fn=None)#inpt=x in tensorflow code, used x here too
+                
 		#z = tf.nn.softsign(z)
 		#z = tf.sigmoid(z) -- worse
 			
@@ -76,7 +78,7 @@ def DiscriminatorCNN(x,input_channel,z_num,repeat_num,hidden_num,data_format,neu
 			x=nengo_dl.tensor_layer(x,layer_func=slim.conv2d,shape_in=shape_in,num_outputs=channel_num,kernel_size=3,stride=1,
 				activation_fn=None,data_format=data_format)
 			x = nengo_dl.tensor_layer(x, neuron_type, **ens_params) 
-			x=tensor_layer(x,layer_func=sli.conv2d,shape_in=shape_in,num_outputs=channel_num,kernel_size=3,stride=1,
+			x=tensor_layer(x,layer_func=slim.conv2d,shape_in=shape_in,num_outputs=channel_num,kernel_size=3,stride=1,
 				activation_fn=None,data_format=data_format)
 			if idx < repeat_num + 2:
 				x = nengo_dl.tensor_layer(x, neuron_type, **ens_params) 
