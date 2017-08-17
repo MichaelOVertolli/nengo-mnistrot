@@ -39,9 +39,9 @@ def main(config):
 
 
 	with net:
-		out_p = nengo.Probe(out)
+		out_p = nengo.Probe(G_out)
 
-	sim = nengo_dl.Simulator(net, minimbatch_size=batch_size)
+	sim = nengo_dl.Simulator(net, minibatch_size=batch_size)
 	sim.load_params("C:\\Users\\Cody\\Downloads\\TensorFlow(DSRI)\\trainoutput.zip")
 	sim.close()
 
